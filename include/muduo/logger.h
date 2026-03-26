@@ -1,0 +1,92 @@
+/**
+ * @FilePath     : /gtest_demo/include/muduo/logger.h
+ * @Description  :  
+ * @Author       : desyang
+ * @Date         : 2026-03-25 20:05:54
+ * @LastEditors  : desyang
+ * @LastEditTime : 2026-03-25 20:46:26
+**/
+#pragma once
+
+#include "muduo/nonecopyable.h"
+#include "muduo/blockedQueue.h"
+
+#include <string>
+#include <memory>
+#include <atomic>
+#include <fstream>
+#include <thread>
+
+// 如何开启异步日志写入
+/// #define ENABLE_ASYNC_LOGING
+
+#define LOG_INFO(format, ...) \
+    do {                                    \
+        char buf[1024];                     \
+        snprintf(buf, 1024, format, ##__VA_ARGS__);\
+        muduo::Logger::GetInstanse().setLevel(muduo::INFO).log(buf);     \
+    } while(0);                             \
+
+
+#define LOG_ERROR(format, ...) \
+    do {                                    \
+        char buf[1024];                     \
+        snprintf(buf, 1024, format, ##__VA_ARGS__);\
+        muduo::Logger::GetInstanse().setLevel(muduo::ERROR).log(buf);     \
+    } while(0); 
+
+#define LOG_FATAL(format, ...) \
+    do {                                    \
+        char buf[1024];                     \
+        snprintf(buf, 1024, format, ##__VA_ARGS__);\
+        muduo::Logger::GetInstanse().setLevel(muduo::FATAL).log(buf);     \
+    } while(0); 
+
+
+// 为了避免debug输出太多信息
+#ifdef MUDEBUG
+#define LOG_DEBUG(format, ...) \
+    do {                                    \
+        char buf[1024];                     \
+        snprintf(buf, 1024, format, ##__VA_ARGS__);\
+        muduo::Logger::GetInstanse().setLevel(muduo::FATAL).log(buf);     \
+    } while(0); 
+#else
+#define LOG_DEBUG(format, ...)
+#endif
+
+// 定义日志级别
+namespace muduo
+{
+enum LoggerLevel {
+    INFO,
+    ERROR,
+    FATAL,
+    DEBUG
+};
+
+// 一个日志类
+class Logger : public nonecopyable {
+private:
+    Logger();
+    
+    int log_level_;
+    bool is_async_{false};
+    std::unique_ptr<BlockedQueue<std::string>> blocked_que_;
+    std::thread async_log_write_thread_;
+    FILE* log_file_;
+
+    void async_log_write();
+public:
+    ~Logger();
+
+    static Logger& GetInstanse();
+
+    Logger& setLevel(int level);
+
+    void log(const std::string&);
+};
+
+
+    
+} // namespace muduo
