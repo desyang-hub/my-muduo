@@ -19,7 +19,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # generate lib
 add_library(mymuduo SHARED ${SOURCE_CODE})
-target_compile_definitions(mymuduo PRIVATE ENABLE_ASYNC_LOGING)
 
 add_executable(main
     src/main.cc

@@ -12,20 +12,18 @@ Logger& Logger::GetInstanse() {
     return logger;
 }
 
-Logger::Logger() {
-// 是否开启异步日志
-#ifdef ENABLE_ASYNC_LOGING
+void Logger::enable_async_log_write() {
     is_async_ = true;
-#endif
-    if (is_async_) {
-        log_file_ = std::fopen("app.log", "a");
-        if (log_file_ == nullptr) {
-            perror("fopen error");
-            exit(-1);
-        }
-        blocked_que_ = std::make_unique<BlockedQueue<std::string>>();
-        async_log_write_thread_ = std::thread(&Logger::async_log_write, this);
+    log_file_ = std::fopen("app.log", "a");
+    if (log_file_ == nullptr) {
+        perror("fopen error");
+        exit(-1);
     }
+    blocked_que_ = std::make_unique<BlockedQueue<std::string>>();
+    async_log_write_thread_ = std::thread(&Logger::async_log_write, this);
+}
+
+Logger::Logger() {
 }
 
 Logger::~Logger() {

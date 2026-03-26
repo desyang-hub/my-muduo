@@ -7,6 +7,8 @@
 
 int main() {
 
+    ENABLE_ASYNC_LOGING();
+
     // LOG_INFO("print message to log");
 
     muduo::InetAddress addr(8080);

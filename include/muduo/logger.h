@@ -17,8 +17,9 @@
 #include <fstream>
 #include <thread>
 
-// 如何开启异步日志写入
-/// #define ENABLE_ASYNC_LOGING
+// 开启异步日志写入
+#define ENABLE_ASYNC_LOGING() \
+    muduo::Logger::GetInstanse().enable_async_log_write()
 
 #define LOG_INFO(format, ...) \
     do {                                    \
@@ -77,11 +78,14 @@ private:
     FILE* log_file_;
 
     void async_log_write();
+    
 public:
     ~Logger();
 
     static Logger& GetInstanse();
 
+    // 开启异步线程
+    void enable_async_log_write();
     Logger& setLevel(int level);
 
     void log(const std::string&);
