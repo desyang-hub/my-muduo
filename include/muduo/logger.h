@@ -22,40 +22,35 @@
     muduo::Logger::GetInstanse().enable_async_log_write()
 
 #define LOG_INFO(format, ...) \
-    do {                                    \
+    if (muduo::Logger::GetInstanse().getLevel() >= muduo::INFO) {                                    \
         char buf[1024];                     \
         snprintf(buf, 1024, format, ##__VA_ARGS__);\
-        muduo::Logger::GetInstanse().setLevel(muduo::INFO).log(buf);     \
-    } while(0);                             \
+        muduo::Logger::GetInstanse().log(buf, muduo::INFO);     \
+    };                             \
 
 
 #define LOG_ERROR(format, ...) \
-    do {                                    \
+if (muduo::Logger::GetInstanse().getLevel() >= muduo::ERROR) {                                    \
         char buf[1024];                     \
         snprintf(buf, 1024, format, ##__VA_ARGS__);\
-        muduo::Logger::GetInstanse().setLevel(muduo::ERROR).log(buf);     \
-    } while(0); 
+        muduo::Logger::GetInstanse().log(buf, muduo::ERROR);     \
+    }; 
 
 #define LOG_FATAL(format, ...) \
-    do {                                    \
+if (muduo::Logger::GetInstanse().getLevel() >= muduo::FATAL) {                                    \
         char buf[1024];                     \
         snprintf(buf, 1024, format, ##__VA_ARGS__);\
-        muduo::Logger::GetInstanse().setLevel(muduo::FATAL).log(buf);     \
-    } while(0); 
+        muduo::Logger::GetInstanse().log(buf, muduo::FATAL);     \
+    }; 
 
 
 // 为了避免debug输出太多信息
-#ifdef MUDEBUG
 #define LOG_DEBUG(format, ...) \
-    do {                                    \
+if (muduo::Logger::GetInstanse().getLevel() >= muduo::DEBUG) {                                    \
         char buf[1024];                     \
         snprintf(buf, 1024, format, ##__VA_ARGS__);\
-        muduo::Logger::GetInstanse().setLevel(muduo::FATAL).log(buf);     \
-    } while(0); 
-#else
-#define LOG_DEBUG(format, ...)
-#endif
-
+        muduo::Logger::GetInstanse().log(buf, muduo::DEBUG);     \
+    }; 
 // 定义日志级别
 namespace muduo
 {
@@ -87,8 +82,9 @@ public:
     // 开启异步线程
     void enable_async_log_write();
     Logger& setLevel(int level);
+    int getLevel() const;
 
-    void log(const std::string&);
+    void log(const std::string&, int log_level);
 };
 
 

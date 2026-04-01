@@ -1,6 +1,7 @@
 #include "muduo/inetAddress.h"
 
 #include <strings.h>
+#include <string.h>
 
 namespace muduo
 {
@@ -25,7 +26,14 @@ uint16_t InetAddress::toPort() const {
     return ntohs(addr_in_.sin_port);
 }
 std::string InetAddress::toIpPort() const {
-    return  toIp() + ":" + std::to_string(toPort());
+    char buf[64];
+    ::inet_ntop(AF_INET, &addr_in_.sin_addr.s_addr, buf, sizeof(buf));
+
+    uint16_t port = ntohs(addr_in_.sin_port);
+
+    snprintf(buf + strlen(buf), 64, ":%u", port);
+    
+    return buf;
 }
     
 } // namespace muduo

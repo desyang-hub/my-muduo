@@ -1,4 +1,5 @@
 #include "muduo/logger.h"
+#include "muduo/timeStamp.h"
 
 #include <thread>
 #include <iostream>
@@ -56,12 +57,16 @@ Logger& Logger::setLevel(int level) {
     return *this;
 }
 
-void Logger::log(const std::string& msg) {
+int Logger::getLevel() const {
+    return log_level_;
+}
 
-    std::string info;
+void Logger::log(const std::string& msg, int log_level) {
+
+    std::string info = TimeStamp::Now().toString() + " ";
 
     // 打印日志级别
-    switch (log_level_)
+    switch (log_level)
     {
     case INFO:
         info += "[INFO] ";
@@ -84,6 +89,7 @@ void Logger::log(const std::string& msg) {
     }
 
     // 时间和message
+    
     info += msg;
     info.push_back('\n');
 
