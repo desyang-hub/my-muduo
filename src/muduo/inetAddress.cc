@@ -3,8 +3,7 @@
 #include <strings.h>
 #include <string.h>
 
-namespace muduo
-{
+using namespace muduo;
 
 
 InetAddress::InetAddress(int port, const std::string& addr) {
@@ -35,5 +34,3 @@ std::string InetAddress::toIpPort() const {
     
     return buf;
 }
-    
-} // namespace muduo

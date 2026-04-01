@@ -11,6 +11,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14")
 # SOURCE CODE
 set(SOURCE_CODE
     src/muduo/logger.cc
+    src/muduo/channel.cc
+    src/muduo/defaultPoller.cc
     src/muduo/inetAddress.cc
     src/muduo/timeStamp.cc
 )

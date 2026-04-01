@@ -1,6 +1,7 @@
 #pragma once
 
 #include "muduo/nonecopyable.h"
+#include "muduo/timeStamp.h"
 
 #include <functional>
 #include <memory>
@@ -10,38 +11,42 @@ namespace muduo
 
 class EventLoop;
 
+// one loop per thread.
 // 封装感兴趣的fd和event, epollIN epollOUT时间
 /// 还有poller返回的事件
 class Channel : public nonecopyable
 {
 private:
     using EventCallback = std::function<void()>;
-    using ReadEventCallback = std::function<void()>;
+    using ReadEventCallback = std::function<void(const TimeStamp&)>;
 public:
     Channel(EventLoop* loop, int fd);
     ~Channel();
 
-    void handleEvent();
+    void handleEvent(const TimeStamp& timeStamp);
 
     void setReadEventCallback(ReadEventCallback cb) {
         readEventCallback_ = std::move(cb);
     }
 
-    void setWriteEventCallback(ReadEventCallback cb) {
+    void setWriteEventCallback(EventCallback cb) {
         writeEventCallback_ = std::move(cb);
     }
 
 
-    void setCloseEventCallback(ReadEventCallback cb) {
+    void setCloseEventCallback(EventCallback cb) {
         closeEventCallback_ = std::move(cb);
     }
 
-    void setErrorEventCallback(ReadEventCallback cb) {
+    void setErrorEventCallback(EventCallback cb) {
         errorEventCallback_ = std::move(cb);
     }
 
     // 防止channel被手动析构后，还在回调函数
-    void tie(const std::shared_ptr<void>&);
+    void tie(const std::shared_ptr<void>& bind) {
+        tie_ = bind;
+        tied_ = true;
+    }
 
     int fd() const {
         return fd_;
@@ -55,9 +60,7 @@ public:
         revents_ = revents;
     }
 
-    void update() {
-
-    }
+    void update();
 
     void enableReading() {
         events_ |= kReadEvent;
@@ -104,6 +107,12 @@ public:
         index_ = index;
     }
 
+    EventLoop* ownerLoop() const {
+        return loop_;
+    }
+
+    void remove();
+
 private:
     static const int kNoneEvent;
     static const int kReadEvent;
@@ -111,18 +120,20 @@ private:
 
     EventLoop* loop_;
     int fd_;
-    int events_; // 感兴趣事件
-    int revents_; // 具体发生的事件
-    int index_;
+    int events_{0}; // 感兴趣事件
+    int revents_{0}; // 具体发生的事件
+    int index_{-1};
 
     std::weak_ptr<void> tie_;
-    bool tied_;
+    bool tied_{false};
 
     // 因为channel能够从epoll获取发生的事件revents, 从而调用对应的事件回调函数
     ReadEventCallback readEventCallback_;
     EventCallback writeEventCallback_;
     EventCallback closeEventCallback_;
     EventCallback errorEventCallback_;
+
+    void handleEventWithGuard(const TimeStamp& timeStamp);
 };
 
     

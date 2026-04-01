@@ -8,7 +8,7 @@
 
 int main() {
 
-    ENABLE_ASYNC_LOGING();
+    // ENABLE_ASYNC_LOGING();
     std::cout << "TimeNow: " << muduo::TimeStamp::Now().toString() << std::endl;
 
     // LOG_INFO("print message to log");
@@ -22,9 +22,5 @@ int main() {
     muduo::InetAddress addr(8080);
 
     LOG_INFO("ip addr: %s", addr.toIpPort().data());
-
-    for (int i = 0; i < 10; ++i) {
-        LOG_INFO("info %d", i);
-    }
     return 0;
 }
